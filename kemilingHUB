@@ -136,6 +136,10 @@ PlayerTab:Toggle("Loop JumpPower", function(state)
     end)
 end)
 
+PlayerTab:Toggle("Loop JumpPower", function(state)
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Alvantv/esp/refs/heads/main/KemilingHUB'))()
+end)
+
 PlayerTab:TextBox("TP Speed", function(value)
 getgenv().TPSpeed = value
 end)
