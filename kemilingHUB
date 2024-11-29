@@ -1,0 +1,237 @@
+--[[
+
+Open source
+Made by ge95
+
+]]
+
+local CoreGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+
+local function isNumber(str)
+  if tonumber(str) ~= nil or str == 'inf' then
+    return true
+  end
+end
+
+getgenv().HitboxSize = 15
+getgenv().HitboxTransparency = 0.9
+
+getgenv().HitboxStatus = false
+getgenv().TeamCheck = false
+
+getgenv().Walkspeed = game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed
+getgenv().Jumppower = game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower
+
+getgenv().TPSpeed = 3
+getgenv().TPWalk = false
+
+--// UI
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vcsk/UI-Library/main/Source/MyUILib(Unamed).lua"))();
+local Window = Library:Create("KemilingHUB by ge8395")
+
+local HomeTab = Window:Tab("Home","rbxassetid://10888331510")
+local PlayerTab = Window:Tab("Players","rbxassetid://12296135476")
+local Teleport = Window:Tab("Teleport","rbxassetid://12308581351")
+
+HomeTab:InfoLabel("Havefun!")
+
+HomeTab:Section("Settings")
+
+HomeTab:TextBox("Hitbox Size", function(value)
+    getgenv().HitboxSize = value
+end)
+
+HomeTab:TextBox("Hitbox Transparency", function(number)
+    getgenv().HitboxTransparency = number
+end)
+
+HomeTab:Section("Main")
+
+HomeTab:Toggle("Status: ", function(state)
+	getgenv().HitboxStatus = state
+    game:GetService('RunService').RenderStepped:connect(function()
+		if HitboxStatus == true and TeamCheck == false then
+			for i,v in next, game:GetService('Players'):GetPlayers() do
+				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
+						v.Character.HumanoidRootPart.Material = "Neon"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		elseif HitboxStatus == true and TeamCheck == true then
+			for i,v in next, game:GetService('Players'):GetPlayers() do
+				if game:GetService('Players').LocalPlayer.Team ~= v.Team then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+						v.Character.HumanoidRootPart.Transparency = HitboxTransparency
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really black")
+						v.Character.HumanoidRootPart.Material = "Neon"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		else
+		    for i,v in next, game:GetService('Players'):GetPlayers() do
+				if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+					pcall(function()
+						v.Character.HumanoidRootPart.Size = Vector3.new(2,2,1)
+						v.Character.HumanoidRootPart.Transparency = 1
+						v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Medium stone grey")
+						v.Character.HumanoidRootPart.Material = "Plastic"
+						v.Character.HumanoidRootPart.CanCollide = false
+					end)
+				end
+			end
+		end
+	end)
+end)
+
+HomeTab:Toggle("Team Check", function(state)
+    getgenv().TeamCheck = state
+end)
+
+HomeTab:Keybind("Toggle UI", Enum.KeyCode.F, function()
+    Library:ToggleUI()
+end)
+
+PlayerTab:TextBox("WalkSpeed", function(value)
+    getgenv().Walkspeed = value
+    pcall(function()
+        game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end)
+end)
+
+PlayerTab:Toggle("Loop WalkSpeed", function(state)
+    getgenv().loopW = state
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if loopW == true then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = Walkspeed
+            end)
+        end
+    end)
+end)
+
+PlayerTab:TextBox("JumpPower", function(value)
+    getgenv().Jumppower = value
+    pcall(function()
+        game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = value
+    end)
+end)
+
+PlayerTab:Toggle("Loop JumpPower", function(state)
+    getgenv().loopJ = state
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if loopJ == true then
+            pcall(function()
+                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = Jumppower
+            end)
+        end
+    end)
+end)
+
+PlayerTab:TextBox("TP Speed", function(value)
+getgenv().TPSpeed = value
+end)
+
+PlayerTab:Toggle("TP Walk", function(s)
+getgenv().TPWalk = s
+local hb = game:GetService("RunService").Heartbeat
+local player = game:GetService("Players")
+local lplr = player.LocalPlayer
+local chr = lplr.Character
+local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+while getgenv().TPWalk and hb:Wait() and chr and hum and hum.Parent do
+  if hum.MoveDirection.Magnitude > 0 then
+    if getgenv().TPSpeed and isNumber(getgenv().TPSpeed) then
+      chr:TranslateBy(hum.MoveDirection * tonumber(getgenv().TPSpeed))
+    else
+      chr:TranslateBy(hum.MoveDirection)
+    end
+  end
+end
+end)
+
+PlayerTab:Slider("Fov", game.Workspace.CurrentCamera.FieldOfView,120, function(v)
+     game.Workspace.CurrentCamera.FieldOfView = v
+end)
+
+PlayerTab:Toggle("Noclip", function(s)
+    getgenv().Noclip = s
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if Noclip == true then
+            game:GetService("RunService").Stepped:wait()
+            game.Players.LocalPlayer.Character.Head.CanCollide = false
+            game.Players.LocalPlayer.Character.Torso.CanCollide = false
+        end
+    end)
+end)
+
+PlayerTab:Toggle("Infinite Jump", function(s)
+getgenv().InfJ = s
+    game:GetService("UserInputService").JumpRequest:connect(function()
+        if InfJ == true then
+            game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+        end
+    end)
+end)
+
+PlayerTab:Button("Rejoin", function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+end)
+
+Teleport:InfoLabel("Jangan Spam")
+
+Teleport:Button("Halte Spawn", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1258, 107, -2340)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
+
+Teleport:Button("Halte Shooting Range", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-2151, 76, -540)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
+
+Teleport:Button("AlexGunshop", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2164, 103, -1763)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
+
+Teleport:Button("Base Rider", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1676, 104, -2317)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
+
+Teleport:Button("Gerbang 2", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1225, 103, -921)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
+
+Teleport:Button("Gerbang 1", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1270, 103, -2045)
+    wait(1)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
+    wait(2)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+end)
